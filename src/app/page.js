@@ -6,6 +6,7 @@ import {
   Check, AlertTriangle, Plus, Trash2, ExternalLink, 
   Copy, Download, Star, Sparkles, LogIn, Lock
 } from 'lucide-react';
+import Link from 'next/link';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('simulator'); // 'schema' | 'rls' | 'client' | 'simulator'
@@ -132,9 +133,15 @@ END:VCALENDAR`;
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <span className="text-xs text-zinc-400 bg-zinc-800 px-3 py-1.5 rounded-full border border-zinc-700">
+            <span className="text-xs text-zinc-400 bg-zinc-800 px-3 py-1.5 rounded-full border border-zinc-700 hidden sm:inline-block">
               🛠️ Arquitetura Multi-Tenant Ativa
             </span>
+            <Link 
+              href="/login" 
+              className="text-xs font-semibold bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl flex items-center gap-1.5 transition-colors shadow-lg shadow-blue-600/15"
+            >
+              <LogIn size={14} /> Entrar / Cadastrar
+            </Link>
           </div>
         </div>
       </header>

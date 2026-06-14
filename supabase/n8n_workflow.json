@@ -1,0 +1,112 @@
+{
+  "name": "Supabase to Google Calendar & WhatsApp (Kodava Barber)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "supabase-booking",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        240
+      ],
+      "id": "supabase-webhook",
+      "name": "Supabase Webhook",
+      "webhookId": "supabase-booking"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "primary",
+          "mode": "list",
+          "cachedResultName": "primary"
+        },
+        "title": "Corte de Cabelo: ={{ $json.body.record.cliente_nome }}",
+        "start": "={{ $json.body.record.data_hora }}",
+        "end": "={{ new Date(new Date($json.body.record.data_hora).getTime() + 45 * 60 * 1000).toISOString() }}",
+        "additionalFields": {
+          "description": "Agendamento Efetuado pelo App Kodava Barber.\nCliente: ={{ $json.body.record.cliente_nome }}\nTelefone: ={{ $json.body.record.cliente_telefone }}\nCPF: ={{ $json.body.record.cliente_cpf }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 2,
+      "position": [
+        260,
+        240
+      ],
+      "id": "google-calendar",
+      "name": "Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "google-calendar-credential-id"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://evolutionapi.n8nkodava.shop/message/sendText/KodaviaIA",
+        "sendHeaders": true,
+        "specifyHeaders": {
+          "parameter": [
+            {
+              "name": "apikey",
+              "value": "AFFC42369CEB-4DB5-9542-80575DE943A9"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"number\": \"{{ $json.body.record.cliente_telefone.replace(/\\D/g, '') }}\",\n  \"options\": {\n    \"delay\": 1200,\n    \"presence\": \"composing\",\n    \"linkPreview\": false\n  },\n  \"textMessage\": {\n    \"text\": \"Olá *{{ $json.body.record.cliente_nome }}*! Seu corte foi agendado com sucesso para o dia *{{ new Date($json.body.record.data_hora).toLocaleDateString('pt-BR') }}* às *{{ new Date($json.body.record.data_hora).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) }}*.\\n\\nAgradecemos a preferência! ✂️\"\n  }\n}"
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        520,
+        240
+      ],
+      "id": "evolution-api-whatsapp",
+      "name": "Evolution API (WhatsApp)"
+    }
+  ],
+  "connections": {
+    "Supabase Webhook": {
+      "main": [
+        [
+          {
+            "node": "Google Calendar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Calendar": {
+      "main": [
+        [
+          {
+            "node": "Evolution API (WhatsApp)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateId": null
+  },
+  "pinData": {}
+}
